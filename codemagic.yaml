@@ -1,0 +1,57 @@
+workflows:
+  ios-compile-check:
+    name: "FinTrust Consent SDK - iOS Compile Check"
+    max_build_duration: 30
+    environment:
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate DemoApp.xcodeproj
+        script: |
+          cd DemoApp
+          xcodegen generate
+      - name: Build for iOS Simulator (no code signing needed)
+        script: |
+          cd DemoApp
+          xcodebuild build \
+            -project DemoApp.xcodeproj \
+            -scheme DemoApp \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+    artifacts:
+      - DemoApp/build/**/*.app
+
+  ios-unsigned-device-build:
+    name: "FinTrust Consent SDK - Unsigned .ipa (for Sideloadly)"
+    max_build_duration: 30
+    environment:
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate DemoApp.xcodeproj
+        script: |
+          cd DemoApp
+          xcodegen generate
+      - name: Build unsigned for real device
+        script: |
+          cd DemoApp
+          xcodebuild build \
+            -project DemoApp.xcodeproj \
+            -scheme DemoApp \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+      - name: Package into unsigned .ipa
+        script: |
+          cd DemoApp
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/DemoApp.app Payload/
+          zip -r DemoApp.ipa Payload
+    artifacts:
+      - DemoApp/DemoApp.ipa
