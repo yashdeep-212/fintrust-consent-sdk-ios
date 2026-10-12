@@ -38,7 +38,7 @@ struct ContentView: View {
                 Button("Identify User") {
                     lastResult = "Identifying..."
                     Task {
-                        await FinTrustConsent.identify(email: "testuser@example.com")
+                        await FinTrustConsent.identify(email: "testuser@example.com", phone: "+919000000004", age: 31)
                         lastResult = "identify() called — check console for result"
                     }
                 }
