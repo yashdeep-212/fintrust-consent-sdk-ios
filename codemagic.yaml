@@ -55,3 +55,25 @@ workflows:
           zip -r DemoApp.ipa Payload
     artifacts:
       - DemoApp/DemoApp.ipa
+
+  ios-url-package-check:
+    name: "FinTrust Consent SDK - URL package check (tag 1.0.0)"
+    max_build_duration: 30
+    environment:
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate DemoApp.xcodeproj (SDK from GitHub URL, not local path)
+        script: |
+          cd DemoApp
+          xcodegen generate --spec project-url.yml
+      - name: Build for iOS Simulator (resolves package from URL)
+        script: |
+          cd DemoApp
+          xcodebuild build \
+            -project DemoApp.xcodeproj \
+            -scheme DemoApp \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
